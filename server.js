@@ -33,6 +33,7 @@ const Data_Schema2 = mongoose.Schema({
   name: String,
   price: Number,
   image: String,
+  userId: String
 });
 
 const model_data = new mongoose.model("datas", Data_Schema1);
@@ -49,18 +50,20 @@ app.get("/get-data", async (req, res) => {
 });
 
 app.post("/send-cart-data", async (req, res) => {
-  const { image, name, price } = req.body;
+  const { image, name, price , userId } = req.body;
   await model_cart.create({
     name: name,
     price: price,
     image: image,
+    userId: userId
   });
   res.status(200).json({ message: "Success" });
 });
 
 app.get("/get-cart-data", async (req, res) => {
+   const { userId } = req.query;
   try {
-    const data = await model_cart.find();
+    const data = await model_cart.find({ userId });
     res.status(200).json({ data });
   } catch (error) {
     console.log(error);
@@ -68,9 +71,9 @@ app.get("/get-cart-data", async (req, res) => {
 });
 
 app.delete("/delete-item", async (req, res) => {
-  const { id } = req.body;
+  const { id, userId } = req.body;
   try {
-    await model_cart.deleteOne({ _id: id });
+    await model_cart.deleteOne({ _id: id, userId });
     res.status(200).json({ message: "Item delete successfully !" });
   } catch (error) {
     console.log(error);
@@ -78,8 +81,9 @@ app.delete("/delete-item", async (req, res) => {
 });
 
 app.delete("/clear-cart", async (req, res) => {
+  const { userId } = req.body;
   try {
-    await model_cart.deleteMany({});
+    await model_cart.deleteMany({ userId });
     res.status(200).json({ message: "Cart cleared from Database !" });
   } catch (error) {
     console.log(error);
